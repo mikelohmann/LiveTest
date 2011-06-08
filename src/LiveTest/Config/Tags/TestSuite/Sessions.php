@@ -15,14 +15,16 @@ namespace LiveTest\Config\Tags\TestSuite;
  *
  * @example
  * Sessions:
-     user_handling:
+     login:
        Pages:
          - /login.php:
-           post:
-             key1: value1
-             key2: value2
-         - /index.php
-         
+           - auth:
+               user: value
+               pass: value
+           - post:
+               key1: value1
+               key2: value2
+
  *
  * @author Mike Lohmann
  */
@@ -33,13 +35,13 @@ class Sessions extends Base
    */
   protected function doProcess(\LiveTest\Config\TestSuite $config, array $parameters)
   {
-    foreach ( $parameters as $name => $value )
+    foreach ( $parameters as $sessionName => $sessionParameter )
     {
       echo "\n\n";
-      print_r($name);
+      print_r($sessionName);
       echo "\n";
-      print_r($value);
-      
+      print_r($sessionParameter);
+
     }
     die();
   }

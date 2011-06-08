@@ -21,17 +21,19 @@ use LiveTest\Config\PageManipulator\PageManipulator;
 
 class TestSuite implements Config
 {
+   const DEFAULT_SESSION = "_default";
+
   /**
    * Pages that are included
    * @var array[]
    */
-  private $includedPageRequests = array ();
+  private $includedSessions = array ();
 
   /**
-   * PageRequests that are excluded
+   * Sessions that are excluded
    * @var array[]
    */
-  private $excludedPageRequests = array ();
+  private $excludedSessions = array ();
 
   /**
    * The created tests.
@@ -79,6 +81,7 @@ class TestSuite implements Config
   }
 
   /**
+   * @todo move to Session
    * Used to add a page manipulator. These manipulators are used to manipulate the
    * pages (url strings) registered in this config file.
 
@@ -135,25 +138,42 @@ class TestSuite implements Config
   }
 
   /**
+   *
+   * sets the current active session
+   * @param String $sessionName
+   */
+  public function setCurrentSession($sessionName)
+  {
+    if(array_key_exists($sessionName, $this->includedSessions))
+    {
+      $this->currentSession = $this->includedSessions[$sessionName];
+    }
+    else
+    {
+      $this->currentSession = $this->includedSessions[self::DEFAULT_SESSION];
+    }
+  }
+
+  /**
    * Include an additional page to the config.
    *
    * @param string $page
    */
-  public function includePageRequest(Request $pageRequest)
+  public function includeSession(Request $pageRequest)
   {
-    $this->includedPageRequests[$pageRequest->getIdentifier()] = $pageRequest;
+    $this->includedSessions[$pageRequest->getIdentifier()] = $pageRequest;
   }
 
   /**
    * Includes an array containing pages to the config.
    *
-   * @param array[] $pageRequests
+   * @param array[] $sessions
    */
-  public function includePageRequests(array $pageRequests)
+  public function includeSessions(array $sessions)
   {
-    foreach ( $pageRequests as $aPageRequest )
+    foreach ( $sessions as $aSession )
     {
-      $this->includePageRequest($aPageRequest);
+      $this->includeSession($aSession);
     }
 
   }
@@ -163,21 +183,21 @@ class TestSuite implements Config
    *
    * @param string $page
    */
-  public function excludePageRequest(Request $pageRequest)
+  public function excludeSession(Request $pageRequest)
   {
-    $this->excludedPageRequests[$pageRequest->getIdentifier()] = $pageRequest;
+    $this->excludedSessions[$pageRequest->getIdentifier()] = $pageRequest;
   }
 
   /**
-   * Removes a set of pageRequests from this config.
+   * Removes a set of sessions from this config.
    *
-   * @param array[] $pageRequests
+   * @param array[] $sessions
    */
-  public function excludePageRequests($pageRequests)
+  public function excludeSessions($sessions)
   {
-    foreach ( $pageRequests as $aPageRequest )
+    foreach ( $sessions as $aSession )
     {
-      $this->excludePageRequest($aPageRequest);
+      $this->excludeSession($aSession);
     }
   }
 
@@ -209,46 +229,49 @@ class TestSuite implements Config
   }
 
   /**
-   * Returns the list of pages.
+   * Returns the list of sessions.
    *
    * @return array[]
    */
-  public function getPageRequests()
+  public function getSessions()
   {
-    
+
     if ($this->inherit && !is_null($this->parentConfig))
     {
-      $results = array_merge($this->includedPageRequests, $this->parentConfig->getPageRequests());
+      $results = array_merge($this->includedSessions, $this->parentConfig->getSessions());
     }
     else
     {
-      $results = $this->includedPageRequests;
+      $results = $this->includedSessions;
     }
 
-    $pageRequests = $this->getReducedPageRequests($results, $this->excludedPageRequests);
+    $sessions = $this->getReducedSessions($results, $this->excludedSessions);
 
+    /**@todo Has to be moved to somewhere else. Is this currently needed?
+     *
+     */
     /*foreach( $this->pageManipulators as $manipulator )
     {
-      foreach( $pageRequests as &$pageRequest )
+      foreach( $sessions as &$pageRequest )
       {
         $pageRequest = $manipulator->manipulate($pageRequest);
       }
     }*/
 
-    return $pageRequests;
+    return $sessions;
   }
 
-  private function getReducedPageRequests(array $includedPageRequest, array $excludedPageRequests)
+  private function getReducedSessions(array $includedSessions, array $excludedSessions)
   {
-     foreach($excludedPageRequests as $identifier => $pageRequest)
+     foreach($excludedSessions as $identifier => $pageRequest)
       {
-        if(array_key_exists($identifier, $includedPageRequest))
+        if(array_key_exists($identifier, $includedSessions))
         {
-          unset($includedPageRequest[$identifier]);
+          unset($includedSessions[$identifier]);
         }
       }
 
-      return $includedPageRequest;
+      return $includedSessions;
   }
 
   /**
