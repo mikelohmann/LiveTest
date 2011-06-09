@@ -9,6 +9,8 @@
 
 namespace LiveTest\Config;
 
+use LiveTest\Config\Session\LiveTestSession;
+
 use Base\Www\Uri;
 use Base\Http\Request\Request;
 
@@ -68,8 +70,6 @@ class TestSuite implements Config
    */
   private $defaultDomain = null;
 
-  private $pageManipulators = array ();
-
   /**
    * Set the parent config if needed.
    *
@@ -78,18 +78,7 @@ class TestSuite implements Config
   public function __construct(TestSuite $parentConfig = null)
   {
     $this->parentConfig = $parentConfig;
-  }
-
-  /**
-   * @todo move to Session
-   * Used to add a page manipulator. These manipulators are used to manipulate the
-   * pages (url strings) registered in this config file.
-
-   * @param PageManipulator $pageManipulator
-   */
-  public function addPageManipulator(PageManipulator $pageManipulator)
-  {
-    $this->pageManipulators[] = $pageManipulator;
+    $this->includeSession(self::DEFAULT_SESSION, new LiveTestSession())
   }
 
   /**
@@ -246,17 +235,6 @@ class TestSuite implements Config
     }
 
     $sessions = $this->getReducedSessions($results, $this->excludedSessions);
-
-    /**@todo Has to be moved to somewhere else. Is this currently needed?
-     *
-     */
-    /*foreach( $this->pageManipulators as $manipulator )
-    {
-      foreach( $sessions as &$pageRequest )
-      {
-        $pageRequest = $manipulator->manipulate($pageRequest);
-      }
-    }*/
 
     return $sessions;
   }

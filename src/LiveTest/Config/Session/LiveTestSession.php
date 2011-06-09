@@ -22,6 +22,24 @@ class LiveTestSession implements Session
    */
   private $excludedPageRequests = array();
 
+  /**
+   *
+   * Container for Page Manipulators
+   * @var array $pageManipulators
+   */
+  private $pageManipulators = array ();
+
+  /**
+   * @todo move to Session
+   * Used to add a page manipulator. These manipulators are used to manipulate the
+   * pages (url strings) registered in this config file.
+
+   * @param PageManipulator $pageManipulator
+   */
+  public function addPageManipulator(PageManipulator $pageManipulator)
+  {
+    $this->pageManipulators[] = $pageManipulator;
+  }
 
   /**
    * Include an additional page to the config.
